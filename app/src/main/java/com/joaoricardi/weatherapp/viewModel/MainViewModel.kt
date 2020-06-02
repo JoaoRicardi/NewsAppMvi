@@ -3,6 +3,7 @@ package com.joaoricardi.weatherapp.viewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.joaoricardi.weatherapp.models.NewsModel
 import com.joaoricardi.weatherapp.service.RetrofitService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -29,7 +30,7 @@ class MainViewModel : ViewModel(){
             val deferedNews = RetrofitService().getNewsApiService().getNews(TOKEN,"us")
             try{
                 val responseDef = deferedNews.await()
-                _state.postValue(ScreenState.Loaded(responseDef.totalResults))
+                _state.postValue(ScreenState.Loaded(responseDef.articles))
 
             }catch (e: Exception){
                 _state.postValue(ScreenState.Error(e.message ?: "Erro"))
@@ -39,7 +40,7 @@ class MainViewModel : ViewModel(){
 
     sealed class ScreenState {
         object Loading: ScreenState()
-        data class Loaded(val value:Int): ScreenState()
+        data class Loaded(val value:List<NewsModel>): ScreenState()
         data class Error(val error: String): ScreenState()
     }
 }
