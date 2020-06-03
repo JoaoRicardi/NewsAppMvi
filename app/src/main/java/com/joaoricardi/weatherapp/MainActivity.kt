@@ -1,8 +1,10 @@
 package com.joaoricardi.weatherapp
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.joaoricardi.weatherapp.adapter.NewsRecyclerAdapter
@@ -10,10 +12,6 @@ import com.joaoricardi.weatherapp.viewModel.MainViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
-
-    private var newsAdapter = NewsRecyclerAdapter()
-
-
     private val viewModel: MainViewModel by lazy {
         ViewModelProviders.of(this).get(MainViewModel::class.java)
     }
@@ -22,14 +20,16 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+
+
         val manager = LinearLayoutManager(this)
+        val newsAdapter = NewsRecyclerAdapter(NewsRecyclerAdapter.OnClickListener{
+            viewModel.showNewsDetail(it)
+        })
+
         with(newsRecyclerId){
             layoutManager = manager
             adapter = newsAdapter
-        }
-
-        btnId.setOnClickListener {
-            viewModel.getNews()
         }
 
         viewModel.state.observeForever {state ->
@@ -56,6 +56,18 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        viewModel.navigateToSelect.observe(this, Observer {
+            if(it != null){
+                Intent(this, DetailActivity::class.java).apply {
+                    putExtra(NEWS, it)
+                    startActivity(this)
+                }
+                viewModel.clearewsDetailNavigate()
+            }
+        })
+    }
 
+    companion object{
+        val NEWS = "NEWS"
     }
 }

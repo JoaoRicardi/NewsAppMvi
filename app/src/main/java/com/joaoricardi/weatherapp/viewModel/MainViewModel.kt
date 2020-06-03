@@ -13,19 +13,27 @@ import java.lang.Exception
 
 class MainViewModel : ViewModel(){
 
-    companion object{
-        val TOKEN = "baeb3bac75ce4332a9374e06f7d24f42"
-    }
-
     private val _state = MutableLiveData<ScreenState>()
     val state: LiveData<ScreenState>
         get() = _state
 
+    private val _navigateToSelect = MutableLiveData<NewsModel>()
+    val navigateToSelect: LiveData<NewsModel>
+        get() = _navigateToSelect
+
     private var viewModelJob = Job()
     private val coroutineScope = CoroutineScope(viewModelJob + Dispatchers.Main )
 
-    fun getNews(){
-        _state.postValue(ScreenState.Loading)
+    companion object{
+        val TOKEN = "baeb3bac75ce4332a9374e06f7d24f42"
+    }
+
+    init {
+        getNews()
+    }
+
+    private fun getNews(){
+       // _state.postValue(ScreenState.Loading)
         coroutineScope.launch {
             val deferedNews = RetrofitService().getNewsApiService().getNews(TOKEN,"us")
             try{
@@ -36,6 +44,14 @@ class MainViewModel : ViewModel(){
                 _state.postValue(ScreenState.Error(e.message ?: "Erro"))
             }
         }
+    }
+
+    fun showNewsDetail(newsModel: NewsModel){
+        _navigateToSelect.value = newsModel
+    }
+
+    fun clearewsDetailNavigate(){
+        _navigateToSelect.value = null
     }
 
     sealed class ScreenState {
