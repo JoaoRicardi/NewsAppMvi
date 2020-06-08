@@ -29,6 +29,6 @@ class DetailViewModelFactory(
         if (modelClass.isAssignableFrom(DetailViewModel::class.java)) {
             return DetailViewModel(newsModel, application) as T
         }
-        throw IllegalArgumentException("Unknown ViewModel class")
+        throw IllegalArgumentException("View Model desconhecida")
     }
 }

@@ -29,13 +29,12 @@ class MainViewModel : ViewModel(){
     }
 
     init {
-        getNews()
+        getNews(1)
     }
 
-    private fun getNews(){
-       // _state.postValue(ScreenState.Loading)
+    private fun getNews(page:Int){
         coroutineScope.launch {
-            val deferedNews = RetrofitService().getNewsApiService().getNews(TOKEN,"us")
+            val deferedNews = RetrofitService().getNewsApiService().getNews(TOKEN,"us",page)
             try{
                 val responseDef = deferedNews.await()
                 _state.postValue(ScreenState.Loaded(responseDef.articles))

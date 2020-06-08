@@ -22,17 +22,14 @@ class DetailActivity : AppCompatActivity() {
 
         val newsModel = intent.getParcelableExtra(MainActivity.NEWS) as? NewsModel
 
+        val viewModelFactory = DetailViewModelFactory(newsModel!!,application)
 
-
-        val viewModelFacttory = DetailViewModelFactory(newsModel!!,application)
-
-        detailViewModel = ViewModelProviders.of(this,viewModelFacttory).get(DetailViewModel::class.java)
+        detailViewModel = ViewModelProviders.of(this,viewModelFactory).get(DetailViewModel::class.java)
 
         detailViewModel.state.observeForever {state ->
             when(state) {
                 is DetailViewModel.ScreenState.ShowDetail -> {
                     supportActionBar?.let {
-
                         title = state.value.author
                     }
                     Glide.with(this).load(state.value.urlToImage).into(imageView)
