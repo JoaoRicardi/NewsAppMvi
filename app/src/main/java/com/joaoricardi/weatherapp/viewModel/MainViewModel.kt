@@ -21,6 +21,10 @@ class MainViewModel : ViewModel(){
     val navigateToSelect: LiveData<NewsModel>
         get() = _navigateToSelect
 
+    private val _currentPage = MutableLiveData<Int>()
+    val currentPage: LiveData<Int>
+        get() = _currentPage
+
     private var viewModelJob = Job()
     private val coroutineScope = CoroutineScope(viewModelJob + Dispatchers.Main )
 
@@ -29,12 +33,18 @@ class MainViewModel : ViewModel(){
     }
 
     init {
-        getNews(1)
+        _currentPage.value = 1
+        getNews()
     }
 
-    private fun getNews(page:Int){
+    private fun getNews(){
+        _state.postValue(ScreenState.Loading)
         coroutineScope.launch {
-            val deferedNews = RetrofitService().getNewsApiService().getNews(TOKEN,"us",page)
+            val deferedNews = RetrofitService().getNewsApiService().getNews(
+                _currentPage.value ?: 1,
+                TOKEN,
+                "us"
+            )
             try{
                 val responseDef = deferedNews.await()
                 _state.postValue(ScreenState.Loaded(responseDef.articles))
@@ -51,6 +61,11 @@ class MainViewModel : ViewModel(){
 
     fun clearewsDetailNavigate(){
         _navigateToSelect.value = null
+    }
+
+    fun getNextPage(){
+        _currentPage.postValue(_currentPage.value?.plus(1))
+        getNews()
     }
 
     sealed class ScreenState {
