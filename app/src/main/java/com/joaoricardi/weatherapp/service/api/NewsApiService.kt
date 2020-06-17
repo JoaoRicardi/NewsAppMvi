@@ -12,8 +12,8 @@ interface NewsApiService {
 
     @GET("top-headlines")
     fun getNews(
+        @Query("page")page: Int,
         @Header("Authorization")token: String,
-        @Query("country")contry: String,
-        @Path("page")page: Int
+        @Query("country")contry: String
     ): Deferred<NewsResponse>
 }

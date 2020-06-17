@@ -25,6 +25,8 @@ class MainActivity : AppCompatActivity() {
             viewModel.showNewsDetail(it)
         })
 
+        btnNextPage.setOnClickListener { viewModel.getNextPage() }
+
         with(newsRecyclerId){
             layoutManager = manager
             adapter = newsAdapter

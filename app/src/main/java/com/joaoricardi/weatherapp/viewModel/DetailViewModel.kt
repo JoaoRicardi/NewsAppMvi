@@ -6,7 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.joaoricardi.weatherapp.models.NewsModel
 
-class DetailViewModel(val newDetail: NewsModel?, val app : Application) : ViewModel(){
+class DetailViewModel(newDetail: NewsModel?, val app : Application) : ViewModel(){
     private var _state = MutableLiveData<ScreenState>()
     val state: LiveData<ScreenState>
         get() = _state
