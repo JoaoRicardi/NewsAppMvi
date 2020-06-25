@@ -13,13 +13,24 @@ import java.lang.Exception
 
 class MainViewModel : ViewModel(){
 
+    fun takeIntention(intention: Intention) {
+        when (intention) {
+          is Intention.LoadInitialData -> {
+              _currentPage.value = 1
+              getNews()
+          }
+          is Intention.NavegateToDetail -> showNewsDetail(intention.newsModel)
+          is Intention.NavegateToNextPage -> getNextPage()
+        }
+    }
+
     private val _state = MutableLiveData<ScreenState>()
     val state: LiveData<ScreenState>
         get() = _state
 
-    private val _navigateToSelect = MutableLiveData<NewsModel>()
-    val navigateToSelect: LiveData<NewsModel>
-        get() = _navigateToSelect
+    private val _events = MutableLiveData<SideEffect>()
+    val events: LiveData<SideEffect>
+        get() = _events
 
     private val _currentPage = MutableLiveData<Int>()
     val currentPage: LiveData<Int>
@@ -30,11 +41,6 @@ class MainViewModel : ViewModel(){
 
     companion object{
         val TOKEN = "baeb3bac75ce4332a9374e06f7d24f42"
-    }
-
-    init {
-        _currentPage.value = 1
-        getNews()
     }
 
     private fun getNews(){
@@ -56,11 +62,11 @@ class MainViewModel : ViewModel(){
     }
 
     fun showNewsDetail(newsModel: NewsModel){
-        _navigateToSelect.value = newsModel
+        _events.postValue(SideEffect.NavigateToNewsDetail(newsModel))
     }
 
     fun clearewsDetailNavigate(){
-        _navigateToSelect.value = null
+        _events.postValue(SideEffect.ClearDetails)
     }
 
     fun getNextPage(){
@@ -72,5 +78,22 @@ class MainViewModel : ViewModel(){
         object Loading: ScreenState()
         data class Loaded(val value:List<NewsModel>): ScreenState()
         data class Error(val error: String): ScreenState()
+    }
+
+    sealed class SideEffect {
+        data class NavigateToNewsDetail(val newsModel: NewsModel): SideEffect()
+        object ClearDetails: SideEffect()
+    }
+
+    sealed class Intention{
+        object LoadInitialData: Intention()
+        data class NavegateToDetail(val newsModel: NewsModel): Intention()
+        object NavegateToNextPage: Intention()
+    }
+
+    class MainActor(private val emit: (Intention) -> Unit) {
+        fun loadInitialData() = emit(Intention.LoadInitialData)
+        fun navegateToDetail(newsModel: NewsModel) = emit(Intention.NavegateToDetail(newsModel))
+        fun navegateToNextPage() = emit(Intention.NavegateToNextPage)
     }
 }

@@ -3,6 +3,7 @@ package com.joaoricardi.weatherapp
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -12,20 +13,22 @@ import com.joaoricardi.weatherapp.viewModel.MainViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
-    private val viewModel: MainViewModel by lazy {
-        ViewModelProviders.of(this).get(MainViewModel::class.java)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val manager = LinearLayoutManager(this)
+        val viewModel: MainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
+
+        val actor = MainViewModel.MainActor(viewModel::takeIntention)
+
         val newsAdapter = NewsRecyclerAdapter(NewsRecyclerAdapter.OnClickListener{
-            viewModel.showNewsDetail(it)
+            actor.navegateToDetail(it)
         })
 
-        btnNextPage.setOnClickListener { viewModel.getNextPage() }
+        val manager = LinearLayoutManager(this)
+
+        btnNextPage.setOnClickListener {actor.navegateToNextPage() }
 
         with(newsRecyclerId){
             layoutManager = manager
@@ -56,15 +59,22 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        viewModel.navigateToSelect.observe(this, Observer {
-            if(it != null){
-                Intent(this, DetailActivity::class.java).apply {
-                    putExtra(NEWS, it)
-                    startActivity(this)
+        viewModel.events.observeForever{sideEffect ->
+            when(sideEffect){
+                is MainViewModel.SideEffect.NavigateToNewsDetail ->{
+                    Intent(this, DetailActivity::class.java).apply {
+                        putExtra(NEWS, sideEffect.newsModel)
+                        startActivity(this)
+                    }
+                    viewModel.clearewsDetailNavigate()
                 }
-                viewModel.clearewsDetailNavigate()
+                is MainViewModel.SideEffect.ClearDetails ->{
+                    // Fazer nada...kkkk
+                }
             }
-        })
+        }
+
+        actor.loadInitialData()
     }
 
     companion object{
