@@ -25,7 +25,9 @@ class MainActivity : AppCompatActivity() {
             viewModel.showNewsDetail(it)
         })
 
-        btnNextPage.setOnClickListener { viewModel.getNextPage() }
+        btnNextPage.setOnClickListener {
+            viewModel.getNews()
+        }
 
         with(newsRecyclerId){
             layoutManager = manager
@@ -38,7 +40,6 @@ class MainActivity : AppCompatActivity() {
                     progressId.visibility = View.VISIBLE
                     errorLayoutId.visibility = View.GONE
                     newsRecyclerId.visibility  = View.GONE
-
                 }
 
                 is MainViewModel.ScreenState.Error -> {
@@ -56,8 +57,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+
+
         viewModel.navigateToSelect.observe(this, Observer {
-            if(it != null){
+            it?.let {
                 Intent(this, DetailActivity::class.java).apply {
                     putExtra(NEWS, it)
                     startActivity(this)

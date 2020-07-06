@@ -25,6 +25,7 @@ class MainViewModel : ViewModel(){
     val currentPage: LiveData<Int>
         get() = _currentPage
 
+
     private var viewModelJob = Job()
     private val coroutineScope = CoroutineScope(viewModelJob + Dispatchers.Main )
 
@@ -37,21 +38,31 @@ class MainViewModel : ViewModel(){
         getNews()
     }
 
-    private fun getNews(){
+     fun getNews() {
         _state.postValue(ScreenState.Loading)
         coroutineScope.launch {
-            val deferedNews = RetrofitService().getNewsApiService().getNews(
+            val newsList = RetrofitService().getNewsApiService().getNews(
                 _currentPage.value ?: 1,
                 TOKEN,
                 "us"
             )
-            try{
-                val responseDef = deferedNews.await()
-                _state.postValue(ScreenState.Loaded(responseDef.articles))
 
-            }catch (e: Exception){
-                _state.postValue(ScreenState.Error(e.message ?: "Erro"))
+            if(newsList.isSuccessful){
+                newsList.body()?.let {
+                    _state.postValue(ScreenState.Loaded(it.articles))
+                }
             }
+            else{
+                _state.postValue(ScreenState.Error( "Erro"))
+            }
+
+//            try{
+//                val responseDef = deferedNews.await()
+//                _state.postValue(ScreenState.Loaded(responseDef.articles))
+//
+//            }catch (e: Exception){
+//            }
+//                _state.postValue(ScreenState.Error(e.message ?: "Erro"))
         }
     }
 
